@@ -1,0 +1,31 @@
+{
+  "note": "2026-09-09 初始技术债基线。Vue 限额只能随拆分下调/删除，禁止调高或新增豁免；唯一历史 DROP 仅按原路径+SHA256 放行。",
+  "vue": {
+    "frontend/src/components/agent/AgentChat.vue": 389,
+    "frontend/src/components/layout/AppLayout.vue": 506,
+    "frontend/src/components/layout/FeatureTour.vue": 410,
+    "frontend/src/components/lead/ManualLeadDialog.vue": 384,
+    "frontend/src/components/leads/LeadActionPanel.vue": 309,
+    "frontend/src/components/leads/LeadAiPanel.vue": 434,
+    "frontend/src/components/search/GlobalSearch.vue": 452,
+    "frontend/src/views/AftercareView.vue": 804,
+    "frontend/src/views/AiSettingsView.vue": 878,
+    "frontend/src/views/AiTasksView.vue": 411,
+    "frontend/src/views/AnalyticsView.vue": 337,
+    "frontend/src/views/AppointmentsView.vue": 514,
+    "frontend/src/views/AssetsView.vue": 664,
+    "frontend/src/views/FinanceView.vue": 323,
+    "frontend/src/views/HomeView.vue": 304,
+    "frontend/src/views/KnowledgeManageView.vue": 388,
+    "frontend/src/views/LeadDetailView.vue": 837,
+    "frontend/src/views/LoginView.vue": 745,
+    "frontend/src/views/MarketingView.vue": 1874,
+    "frontend/src/views/RoleplayView.vue": 331,
+    "frontend/src/views/SplashView.vue": 383,
+    "frontend/src/views/TeamView.vue": 392,
+    "frontend/src/views/WorkOrdersView.vue": 500
+  },
+  "migrations": {
+    "backend/prisma/migrations/20260817170738_p5_delivery/migration.sql": "2a2d1e3de0c8fe48ef7ca7a7bf4e6a86977112af4050dddd49cc55696df7a832"
+  }
+}

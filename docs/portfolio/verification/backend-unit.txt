@@ -1,0 +1,13 @@
+Command output; exit code: 0
+
+
+ RUN  v4.1.10 <isolated-checkout>/backend
+
+[Nest] 65422  - 09/11/2026, 3:51:16 PM    WARN [WsOpenClawGateway] sessions.usage 查询失败（runId=run-1，第 1 次）：sessions.usage unavailable
+[Nest] 65422  - 09/11/2026, 3:51:16 PM    WARN [WsOpenClawGateway] sessions.usage 查询失败（runId=run-1，第 2 次）：sessions.usage unavailable
+[Nest] 65422  - 09/11/2026, 3:51:16 PM    WARN [WsOpenClawGateway] sessions.usage 未取到用量（agent:main:explicit:run-1）：token/成本留空
+
+ Test Files  5 passed (5)
+      Tests  35 passed (35)
+   Start at  15:51:16
+   Duration  6.43s (transform 245ms, setup 51ms, import 662ms, tests 5.39s, environment 0ms)

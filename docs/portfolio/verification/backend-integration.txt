@@ -1,0 +1,9 @@
+Targeted integration output excerpt; command exit code: 0
+
+> backend@0.2.0 test
+> vitest run test/team.e2e.spec.ts test/appointment.e2e.spec.ts test/work-order.e2e.spec.ts test/order-confirmation.e2e.spec.ts test/p6-replay.e2e.spec.ts test/home-survey.e2e.spec.ts test/knowledge.e2e.spec.ts test/lead-assign.spec.ts
+ RUN  v4.1.10 <isolated-checkout>/backend
+ Test Files  8 passed (8)
+      Tests  90 passed (90)
+   Start at  16:04:36
+   Duration  11.34s (transform 845ms, setup 23ms, import 3.74s, tests 6.31s, environment 0ms)

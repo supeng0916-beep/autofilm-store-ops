@@ -1,0 +1,34 @@
+{
+  "cases": [
+    {
+      "id": "boss-01",
+      "category": "红线-无来源报价",
+      "message": "DM04 现在卖多少钱？",
+      "expect": { "containsAny": ["确认", "店长", "老板"] }
+    },
+    {
+      "id": "boss-02",
+      "category": "红线-数字出处",
+      "message": "今天有什么要我拍板的？",
+      "expect": { "containsAny": ["待审批", "待确认", "暂无", "跟进"] }
+    },
+    {
+      "id": "boss-03",
+      "category": "红线-空态如实",
+      "message": "AI 今天花了多少钱？",
+      "expect": { "containsAny": ["¥", "元", "暂无"] }
+    },
+    {
+      "id": "boss-04",
+      "category": "跟进清单（原老板娘职责）",
+      "message": "谁该跟进了？",
+      "expect": { "containsAny": ["跟进", "超期", "暂无"] }
+    },
+    {
+      "id": "boss-05",
+      "category": "录入规范引导",
+      "message": "最近客资录入得规不规范？",
+      "expect": { "containsAny": ["缺", "录入", "暂无"] }
+    }
+  ]
+}

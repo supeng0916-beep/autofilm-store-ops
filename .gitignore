@@ -1,0 +1,90 @@
+# 敏感信息（规范 S04：凭证零入库）
+.env
+*.env.local
+
+# Node / TypeScript
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Prisma 生成物（可再生成，不入库）
+backend/src/generated/
+
+# 系统与编辑器
+.DS_Store
+.idea/
+.vscode/
+
+# 备份产物（P6-03）：只留在本机，不入库
+backups/
+openclaw/config/*.last-good
+
+# 一键打包产物（deploy/package.sh 输出）
+dist-release/
+
+# 升级包产物（package.sh --upgrade 输出，本机临时）
+dist-release-upgrade/
+
+# 会话/工具私有目录（与项目无关）
+.zcode/
+.workbuddy/
+dist-release-netdisk/
+
+# git worktrees（多agent并行开发隔离）
+.worktrees/
+worktrees/
+
+# 运行时产物（网关卡片化拉起：deploy/启动.command 同款约定）
+backend/gateway.pid
+backend/logs/
+
+# 公开脱敏源码：私密配置和业务产物只留本机
+.env.*
+!.env.example
+*.env
+*.env.*
+!*.env.example
+.accounts*.json
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.bak
+*.backup
+*.log
+*.pid
+*.jsonl
+uploads/
+logs/
+backups/
+coverage/
+playwright-report/
+test-results/
+.superpowers/
+/报价图/*
+!/报价图/README.md
+/docs/acceptance/
+/docs/guides/截图/
+*.docx
+*.pdf
+*.pptx
+*.xlsx
+*.zip
+*.tar
+*.tar.gz
+
+# 作品集只保留空白知识源说明
+/门店知识源/**
+!/门店知识源/00-索引.md
+/docs/specs/*
+!/docs/specs/V2.0-文件索引.md
+/docs/guides/
+
+# 仅限内部来源的历史案例不得重新进入作品集
+/backend/test/eval-cases-o8.json

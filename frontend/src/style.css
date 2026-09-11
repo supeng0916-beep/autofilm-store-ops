@@ -1,0 +1,338 @@
+/* 全局基础样式 */
+body {
+  margin: 0;
+  font-family: var(--el-font-family);
+}
+
+/* 操作提示（ElMessage）：居中卡片（2026-08-21 门店反馈：默认位置易被忽略）
+ * 覆盖 Element Plus 逐条计算的行内 top，强制视口正中；业务层同时只保留最新一条 */
+.el-message {
+  position: fixed !important; /* EP 按需引入漏装消息样式时兜底：没有 fixed，top/left 不生效（2026-08-21 左下角漂移根因） */
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  max-width: min(560px, 86vw) !important;
+  white-space: normal !important;
+  border-radius: 14px !important;
+  padding: 16px 26px !important;
+  font-size: 14px !important;
+  min-width: 280px !important;
+  border: 1px solid var(--wg-hairline, #e0e0e0) !important;
+  background: var(--wg-surface, #fff) !important;
+  background-color: var(--wg-surface, #fff) !important;
+  color: var(--wg-ink, #1d1d1f) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16) !important;
+  z-index: 9999 !important;
+  /* 与退出账号确认框保持同一层级的实心卡片视觉；避免主题变量缺失时退化为透明 */
+  opacity: 1 !important;
+  isolation: isolate;
+}
+.el-message::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: #fff;
+  background: var(--wg-surface, #fff);
+}
+.el-message__content {
+  color: var(--wg-ink, #1d1d1f) !important;
+  line-height: 1.5 !important;
+}
+.el-message .el-message__icon {
+  flex-shrink: 0;
+}
+.el-message ~ .el-message {
+  top: calc(50% + 68px) !important;
+}
+.el-message ~ .el-message ~ .el-message {
+  top: calc(50% + 136px) !important;
+}
+
+/* 确认/输入弹窗（ElMessageBox）：屏幕正中卡片（2026-08-22 门店反馈）
+ * EP 按需引入漏装 message-box 定位样式（position:static → 贴顶通条），此处全局兜底 */
+.el-message-box {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: min(420px, calc(100vw - 48px)) !important;
+  max-width: min(420px, calc(100vw - 48px)) !important;
+  padding: 22px 24px !important;
+  border: 1px solid var(--wg-hairline, #e0e0e0) !important;
+  border-radius: 16px !important;
+  background: var(--wg-surface, #fff) !important;
+  background-color: var(--wg-surface, #fff) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28) !important;
+  z-index: 2006 !important;
+}
+.el-message-box__title,
+.el-message-box__message {
+  color: var(--wg-ink, #1d1d1f) !important;
+}
+.el-message-box__input .el-input__wrapper {
+  background: var(--wg-canvas, #f5f5f7) !important;
+}
+
+/* 确认/输入弹窗版式（2026-08-22 门店反馈）：文字居中 + 字号随卡片放大；
+ * 无标题的弹窗（title 传空串）隐藏头部，保持极简 */
+.el-message-box__title {
+  display: block !important;
+  text-align: center !important;
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  color: var(--wg-ink, #1d1d1f) !important;
+}
+.el-message-box__message {
+  text-align: center !important;
+  font-size: 16px !important;
+  letter-spacing: 0.02em !important;
+  color: var(--wg-ink, #1d1d1f) !important;
+}
+.el-message-box__btns {
+  justify-content: center !important;
+  padding-top: 6px !important;
+}
+.el-message-box__header:has(.el-message-box__title:empty) {
+  display: none !important;
+}
+/* 弹窗内容整体收边距：消息与按钮组垂直节奏 */
+.el-message-box__content {
+  padding: 6px 4px 14px !important;
+}
+
+/* 弹窗按钮组（补 2026-08-22）：EP 样式缺失使容器为 block（居中失效）——显式 flex 居中 */
+.el-message-box__btns {
+  display: flex !important;
+  justify-content: center !important;
+  gap: 12px !important;
+}
+.el-message-box__btns .el-button + .el-button {
+  margin-left: 0 !important;
+}
+
+/* el-dialog（改密等表单弹窗）：对齐 ElMessageBox 极简居中卡片语言（2026-08-22）
+ * EP 样式缺失/默认顶置时兜底：正中定位 + 16px 圆角 + 居中标题/按钮 */
+.el-dialog {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--wg-hairline, #e0e0e0) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28) !important;
+  background: var(--wg-surface, #fff) !important;
+  background-color: var(--wg-surface, #fff) !important;
+  padding: 10px 6px 6px !important;
+  z-index: 2006 !important;
+  overflow: hidden !important;
+  opacity: 1 !important;
+  isolation: isolate;
+}
+.el-dialog::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: #fff;
+  background: var(--wg-surface, #fff);
+}
+.el-dialog__body {
+  color: var(--wg-ink, #1d1d1f) !important;
+  background: var(--wg-surface, #fff) !important;
+  background-color: var(--wg-surface, #fff) !important;
+}
+.el-drawer {
+  background: var(--wg-surface, #fff) !important;
+  background-color: var(--wg-surface, #fff) !important;
+  color: var(--wg-ink, #1d1d1f) !important;
+}
+.el-drawer__header,
+.el-drawer__body,
+.el-drawer__footer {
+  background: var(--wg-surface, #fff) !important;
+  background-color: var(--wg-surface, #fff) !important;
+  color: var(--wg-ink, #1d1d1f) !important;
+}
+.el-drawer__header {
+  border-bottom: 1px solid var(--wg-divider-soft, #f0f0f0) !important;
+}
+.el-popover,
+.el-dropdown-menu {
+  background: var(--wg-surface, #fff) !important;
+  color: var(--wg-ink, #1d1d1f) !important;
+  border-color: var(--wg-hairline, #e0e0e0) !important;
+}
+.el-dialog__title {
+  display: block;
+  text-align: center !important;
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  color: var(--wg-ink, #1d1d1f) !important;
+  letter-spacing: 0.02em;
+}
+.el-dialog__header {
+  padding-bottom: 10px !important;
+}
+.el-dialog__footer {
+  display: flex !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  padding-top: 4px !important;
+}
+.el-dialog__footer .el-button + .el-button {
+  margin-left: 0 !important;
+}
+@media (max-width: 640px) {
+  .el-dialog {
+    width: calc(100vw - 32px) !important;
+    max-width: calc(100vw - 32px) !important;
+  }
+}
+/* 遮罩与 MB 一致 */
+.el-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  z-index: 2003 !important;
+}
+
+/* ─── 移动端全局适配（≤768px，2026-09-02 门店实况：员工走动办公用手机）───
+ * 布局层（侧栏抽屉化/顶栏简化）在 AppLayout 内做；这里兜住 Element Plus
+ * 组件用固定像素尺寸的场景——抽屉 size、对话框 width、日期面板宽度，
+ * 各组件不逐个改 prop，一律按视口钳宽，桌面端零影响。 */
+@media (max-width: 768px) {
+  /* 左右抽屉：size 写死 400~560px 会超出手机视口（AI 助手 420/搜索详情 440 等），
+   * 统一钳到 92vw；上下抽屉（ttb/btt）不受宽度约束 */
+  .el-drawer.ltr,
+  .el-drawer.rtl {
+    max-width: 92vw;
+  }
+  /* 对话框：width prop 固定值（480/520/560/720px）统一钳宽（原 640 断点抬到 768，
+   * 覆盖 667/736px 横屏）；高度也限住，内部滚动而不是顶出屏幕 */
+  .el-dialog {
+    width: calc(100vw - 32px) !important;
+    max-width: calc(100vw - 32px) !important;
+    max-height: calc(100vh - 48px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .el-dialog .el-dialog__body {
+    overflow-y: auto;
+    min-height: 0;
+  }
+  /* 日期范围面板：默认双月并排 min-width 646px，窄屏改上下单列；
+   * 单日期/时间面板同理钳宽，超出部分面板内滚动 */
+  .el-picker-panel {
+    max-width: calc(100vw - 16px);
+  }
+  .el-date-range-picker {
+    width: calc(100vw - 16px);
+  }
+  .el-date-range-picker .el-picker-panel__body {
+    min-width: 0 !important;
+    display: flex;
+    flex-direction: column;
+  }
+  .el-date-range-picker .el-date-range-picker__content {
+    float: none;
+    flex-basis: auto;
+    width: 100%;
+  }
+  /* 栅格列强制单列（全站仅 AiTasksView 用 el-col span=12 并排两表）：
+   * 半宽表格在手机上挤成纸条，堆叠为上下两块 */
+  .el-row .el-col {
+    float: none;
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 100%;
+  }
+  /* 分页条允许换行：总条数 + 页码 + 跳页一行放不下时折行而非溢出 */
+  .el-pagination {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+  /* 表格单元格收紧（2026-09-02 门店实况反馈）：字号与内距压缩，
+   * 客资队列 9 列 ~1100px 压到 ~950px，首屏多见两列、少滚一段 */
+  .el-table .cell {
+    font-size: 12.5px;
+    padding: 0 6px;
+  }
+  .el-table .el-table__cell {
+    padding: 6px 0;
+  }
+  /* 表格横向滚动条（同上反馈的根治项）：EP 默认 hover 才显示且贴表格
+   * 最底部——手机没有悬停（条等于隐形，EP 还写了内联 display:none 需
+   * !important 压制）、行多时要先把页面滚到表格底才摸得到。手机端改为
+   * 常显、加粗到 8px、悬浮到表格顶部（表头正下方），任何时刻可见可
+   * 拖；thumb 半透明主色不抢戏 */
+  .el-table .el-scrollbar__bar.is-horizontal {
+    display: block !important;
+    opacity: 1;
+    height: 8px;
+    bottom: auto;
+    top: 0;
+    z-index: 3;
+  }
+  .el-table .el-scrollbar__bar.is-horizontal > div {
+    height: 8px;
+    border-radius: 4px;
+    background-color: var(--el-color-primary);
+    opacity: 0.55;
+  }
+  /* 表格横滚到头不再把剩余手势传给页面（纵向滚动不受影响） */
+  .el-table .el-scrollbar__wrap {
+    overscroll-behavior-x: contain;
+  }
+  /* 表单弹窗内标签置顶：label-width 88~110px 在 343px 内容宽里占三分之一，
+   * 手机上标签到顶、内容占满行（Element Plus label-position 覆盖） */
+  .el-dialog .el-form .el-form-item {
+    display: block;
+  }
+  .el-dialog .el-form .el-form-item__label {
+    display: block;
+    width: 100% !important;
+    height: auto;
+    line-height: 1.6;
+    text-align: left;
+    padding-bottom: 4px;
+  }
+  .el-dialog .el-form .el-form-item__content {
+    margin-left: 0 !important;
+  }
+}
+
+/* 客资详情三栏卡片：即使宿主主题覆盖 Element Plus 变量，也保持不透明底和可读层次。 */
+.lead-card {
+  position: relative;
+  isolation: isolate;
+  background: #fff !important;
+  background-color: var(--wg-surface, #fff) !important;
+  color: var(--wg-ink, #1d1d1f) !important;
+  opacity: 1 !important;
+}
+.lead-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: #fff;
+  background: var(--wg-surface, #fff);
+}
+.lead-card__timeline {
+  max-height: min(68vh, 640px);
+  overflow-y: auto;
+  padding-right: 4px !important;
+}
+.lead-card__event {
+  background: var(--wg-surface, #fff);
+}
+html.dark .el-message::before,
+html.dark .el-dialog::before,
+html.dark .lead-card::before {
+  background: var(--wg-surface, #1e2128);
+}

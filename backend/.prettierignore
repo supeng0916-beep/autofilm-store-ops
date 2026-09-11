@@ -1,0 +1,4 @@
+# 构建产物与生成代码不参与格式检查（与 eslint ignores 对齐）
+dist/
+coverage/
+src/generated/

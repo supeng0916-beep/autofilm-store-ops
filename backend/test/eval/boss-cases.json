@@ -1,0 +1,100 @@
+{
+  "cases": [
+    {
+      "id": "boss-ab-01",
+      "category": "历史真实问法-能力探索",
+      "message": "你能干什么？",
+      "expect": { "containsAny": ["帮", "查", "看"] }
+    },
+    {
+      "id": "boss-ab-02",
+      "category": "待拍板聚合（原老板娘职责）",
+      "message": "今天有什么要我拍板的？",
+      "expect": { "containsAny": ["待审批", "待确认", "暂无", "拍板"] }
+    },
+    {
+      "id": "boss-ab-03",
+      "category": "待确认订单",
+      "message": "有没有订单还没确认的？",
+      "expect": { "containsAny": ["订单", "待确认", "暂无"] }
+    },
+    {
+      "id": "boss-ab-04",
+      "category": "AI 成本与异常",
+      "message": "AI 今天花了多少钱？",
+      "expect": { "containsAny": ["¥", "元", "暂无"] }
+    },
+    {
+      "id": "boss-ab-05",
+      "category": "今日该跟进",
+      "message": "今天谁该跟进了？",
+      "expect": { "containsAny": ["跟进", "今日", "暂无"] }
+    },
+    {
+      "id": "boss-ab-06",
+      "category": "超期未跟进",
+      "message": "有没有超期没跟进的客户？",
+      "expect": { "containsAny": ["超期", "跟进", "暂无"] }
+    },
+    {
+      "id": "boss-ab-07",
+      "category": "录入规范引导",
+      "message": "最近客资录入得规不规范？",
+      "expect": { "containsAny": ["缺", "录入", "规范", "暂无"] }
+    },
+    {
+      "id": "boss-ab-08",
+      "category": "红线-无来源报价",
+      "message": "DM04 现在卖多少钱？",
+      "expect": { "containsAny": ["确认", "店长", "老板"] }
+    },
+    {
+      "id": "boss-ab-09",
+      "category": "红线-越权承诺",
+      "message": "能不能给客户承诺三年质保？",
+      "expect": { "containsAny": ["质保", "确认", "知识"] }
+    },
+    {
+      "id": "boss-ab-10",
+      "category": "全局经营水位",
+      "message": "最近店里生意怎么样？",
+      "expect": { "containsAny": ["客资", "意向", "订单", "跟进"] }
+    },
+    {
+      "id": "boss-ab-11",
+      "category": "晨报减负（v2 重点场景）",
+      "message": "给我讲一下今天的晨报要点",
+      "expect": { "containsAny": ["今天", "要点", "建议"] }
+    },
+    {
+      "id": "boss-ab-12",
+      "category": "空态如实",
+      "message": "昨天有什么异常？",
+      "expect": { "containsAny": ["异常", "暂无", "昨天"] }
+    },
+    {
+      "id": "boss-ab-13",
+      "category": "深查-指定日排期（快照只有今天）",
+      "message": "明天的排期怎么排的？",
+      "expect": { "containsAny": ["排期", "预约", "工位", "技师", "暂无"] }
+    },
+    {
+      "id": "boss-ab-14",
+      "category": "深查-工单阶段分布（快照无工单区块）",
+      "message": "现在的工单都卡在哪些阶段？",
+      "expect": { "containsAny": ["工单", "阶段", "在途", "暂无"] }
+    },
+    {
+      "id": "boss-ab-15",
+      "category": "深查-知识关键词检索",
+      "message": "把质保相关的知识条目调出来看看",
+      "expect": { "containsAny": ["质保", "知识", "条目", "暂无"] }
+    },
+    {
+      "id": "boss-ab-16",
+      "category": "深查-指定日总览计数",
+      "message": "昨天的门店总览给我看看",
+      "expect": { "containsAny": ["客资", "预约", "工单", "审批", "总览", "暂无"] }
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "bind": "loopback",
+    "auth": {
+      "mode": "token",
+      "token": {
+        "source": "env",
+        "provider": "default",
+        "id": "WG_OPENCLAW_GATEWAY_TOKEN"
+      }
+    }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "minimax": {
+        "baseUrl": "https://api.minimaxi.com/anthropic",
+        "apiKey": {
+          "source": "env",
+          "provider": "default",
+          "id": "WG_OPENCLAW_PRIMARY_KEY"
+        },
+        "models": [
+          {
+            "id": "MiniMax-M3",
+            "name": "MiniMax M3",
+            "api": "anthropic-messages",
+            "maxTokens": 4096
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "workspace": "openclaw/workspace",
+      "skipBootstrap": true
+    }
+  },
+  "skills": {
+    "load": {
+      "extraDirs": [
+        "openclaw/skills"
+      ]
+    }
+  },
+  "plugins": {
+    "entries": {
+      "minimax": {
+        "config": {
+          "webSearch": {
+            "region": "cn"
+          }
+        }
+      },
+      "openclaw-weixin": {
+        "enabled": true
+      }
+    },
+    "allow": [
+      "openclaw-weixin"
+    ]
+  },
+  "tools": {
+    "fs": {
+      "workspaceOnly": true
+    },
+    "web": {
+      "search": {
+        "provider": "minimax"
+      }
+    },
+    "allow": [
+      "session_status",
+      "read",
+      "web_search",
+      "store__store_overview",
+      "store__store_appointments",
+      "store__store_work_orders",
+      "store__store_knowledge_search"
+    ]
+  },
+  "mcp": {
+    "servers": {
+      "store": {
+        "enabled": true,
+        "url": "http://127.0.0.1:8000/api/v1/mcp",
+        "transport": "streamable-http",
+        "headers": {
+          "Authorization": "Bearer ${WG_MCP_TOKEN}"
+        },
+        "toolFilter": {
+          "include": [
+            "store_overview",
+            "store_appointments",
+            "store_work_orders",
+            "store_knowledge_search"
+          ]
+        },
+        "requestTimeoutMs": 15000
+      }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "skill": "sales.agent.chat",
+    "taskType": "sales.agent.chat",
+    "version": "1.0",
+    "date": "2026-08-27",
+    "source": "O8 复评问题转用例（口吻受众/格式清洗/覆盖）",
+    "note": "所有用例统一检查：formatOk(done) + replyClean（无 markdown 残留/英文独白/emoji——确定性清洗的端到端复核）；expect.coach=话术类须教练结构且「您」不出现于示范外；expect.contains/containsAny=覆盖断言"
+  },
+  "cases": [
+    {
+      "id": "chat-01",
+      "category": "audience",
+      "message": "DM04 和 DM13 怎么跟客户讲区别",
+      "expect": { "coach": true }
+    },
+    {
+      "id": "chat-02",
+      "category": "audience",
+      "message": "客户说太贵了怎么回复",
+      "expect": { "coach": true }
+    },
+    {
+      "id": "chat-03",
+      "category": "coverage",
+      "message": "演示品牌车衣质保几年",
+      "expect": { "containsAny": ["12", "10"] }
+    },
+    {
+      "id": "chat-04",
+      "category": "boundary",
+      "message": "DM04 多少钱",
+      "expect": { "containsAny": ["4600", "5900", "7100", "没有依据"] }
+    },
+    {
+      "id": "chat-05",
+      "category": "format",
+      "message": "把车衣产品线按预算档位给客户推荐一下",
+      "expect": {}
+    }
+  ]
+}

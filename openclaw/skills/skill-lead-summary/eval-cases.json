@@ -1,0 +1,314 @@
+{
+  "taskType": "lead.summary",
+  "note": "全合成评测集（P3-05）：零真实客户数据，refId 为合成假名，覆盖高/中/低意向、住宅膜、虚拟微信、到店/4S/转介绍等维度。",
+  "cases": [
+    {
+      "id": "ls-001",
+      "name": "高意向-改色膜-预算明确",
+      "context": {
+        "refId": "ref_synth_001",
+        "sourcePlatform": "抖音",
+        "businessType": "auto_film",
+        "target": "特斯拉 Model Y",
+        "productNeed": "改色膜",
+        "rawNeed": "想贴改色膜，预算 6000 左右，最好这个月内",
+        "stage": "new",
+        "lastFollowUpResult": null
+      }
+    },
+    {
+      "id": "ls-002",
+      "name": "高意向-全车车衣-4S介绍",
+      "context": {
+        "refId": "ref_synth_002",
+        "sourcePlatform": "4S店",
+        "businessType": "auto_film",
+        "target": "理想 L9",
+        "productNeed": "全车隐形车衣",
+        "rawNeed": "4S 店介绍的，想贴全车车衣，预算 15000，随时可到店",
+        "stage": "new",
+        "lastFollowUpResult": null
+      }
+    },
+    {
+      "id": "ls-003",
+      "name": "高意向-已到店预约",
+      "context": {
+        "refId": "ref_synth_003",
+        "sourcePlatform": "到店",
+        "businessType": "auto_film",
+        "target": "宝马 X5",
+        "productNeed": "车窗隔热膜",
+        "rawNeed": "到店看过样片，打算这个周末来贴",
+        "stage": "new",
+        "lastFollowUpResult": "已到店看样片，约定周末施工"
+      }
+    },
+    {
+      "id": "ls-004",
+      "name": "高意向-老客户转介绍",
+      "context": {
+        "refId": "ref_synth_004",
+        "sourcePlatform": "老客户转介绍",
+        "businessType": "auto_film",
+        "target": "比亚迪 汉",
+        "productNeed": "改色膜",
+        "rawNeed": "朋友介绍来的，他贴过说不错，我也要贴",
+        "stage": "new",
+        "lastFollowUpResult": null
+      }
+    },
+    {
+      "id": "ls-005",
+      "name": "中意向-对比价格",
+      "context": {
+        "refId": "ref_synth_005",
+        "sourcePlatform": "小红书",
+        "businessType": "auto_film",
+        "target": "小鹏 P7",
+        "productNeed": "改色膜",
+        "rawNeed": "你们家改色膜多少钱？我在对比几家",
+        "stage": "new",
+        "lastFollowUpResult": null
+      }
+    },
+    {
+      "id": "ls-006",
+      "name": "中意向-咨询质保",
+      "context": {
+        "refId": "ref_synth_006",
+        "sourcePlatform": "抖音",
+        "businessType": "auto_film",
+        "target": "特斯拉 Model 3",
+        "productNeed": "隐形车衣",
+        "rawNeed": "车衣质保几年？会不会黄变？",
+        "stage": "new",
+        "lastFollowUpResult": null
+      }
+    },
+    {
+      "id": "ls-007",
+      "name": "中意向-已联系待回复",
+      "context": {
+        "refId": "ref_synth_007",
+        "sourcePlatform": "视频号",
+        "businessType": "auto_film",
+        "target": "蔚来 ES6",
+        "productNeed": "车窗膜",
+        "rawNeed": "先了解下，回头有需要再联系",
+        "stage": "contacted",
+        "lastFollowUpResult": "已初次联系，客户说再看看"
+      }
+    },
+    {
+      "id": "ls-008",
+      "name": "中意向-需求不明确",
+      "context": {
+        "refId": "ref_synth_008",
+        "sourcePlatform": "抖音",
+        "businessType": "auto_film",
+        "target": null,
+        "productNeed": null,
+        "rawNeed": "新车想保护一下漆面，不知道贴什么好",
+        "stage": "new",
+        "lastFollowUpResult": null
+      }
+    },
+    {
+      "id": "ls-009",
+      "name": "低意向-随便问问",
+      "context": {
+        "refId": "ref_synth_009",
+        "sourcePlatform": "小红书",
+        "businessType": "auto_film",
+        "target": null,
+        "productNeed": null,
+        "rawNeed": "随便看看，你们店在哪？",
+        "stage": "new",
+        "lastFollowUpResult": null
+      }
+    },
+    {
+      "id": "ls-010",
+      "name": "低意向-已拒绝跟进",
+      "context": {
+        "refId": "ref_synth_010",
+        "sourcePlatform": "抖音",
+        "businessType": "auto_film",
+        "target": "本田 CR-V",
+        "productNeed": "改色膜",
+        "rawNeed": "太贵了，暂时不弄了",
+        "stage": "contacted",
+        "lastFollowUpResult": "客户嫌贵，明确表示暂时不需要"
+      }
+    },
+    {
+      "id": "ls-011",
+      "name": "低意向-仅咨询无行动",
+      "context": {
+        "refId": "ref_synth_011",
+        "sourcePlatform": "视频号",
+        "businessType": "auto_film",
+        "target": null,
+        "productNeed": null,
+        "rawNeed": "你们贴膜要多久？",
+        "stage": "new",
+        "lastFollowUpResult": null
+      }
+    },
+    {
+      "id": "ls-012",
+      "name": "住宅膜-客厅隔热",
+      "context": {
+        "refId": "ref_synth_012",
+        "sourcePlatform": "小红书",
+        "businessType": "home_film",
+        "target": "住宅客厅玻璃",
+        "productNeed": "隔热膜",
+        "rawNeed": "客厅西晒太热，想贴隔热膜",
+        "stage": "new",
+        "lastFollowUpResult": null
+      }
+    },
+    {
+      "id": "ls-013",
+      "name": "住宅膜-隐私需求",
+      "context": {
+        "refId": "ref_synth_013",
+        "sourcePlatform": "抖音",
+        "businessType": "home_film",
+        "target": "住宅卧室玻璃",
+        "productNeed": "隐私膜",
+        "rawNeed": "卧室玻璃想贴隐私膜，白天外面看不到里面",
+        "stage": "new",
+        "lastFollowUpResult": null
+      }
+    },
+    {
+      "id": "ls-014",
+      "name": "住宅膜-报价咨询",
+      "context": {
+        "refId": "ref_synth_014",
+        "sourcePlatform": "抖音",
+        "businessType": "home_film",
+        "target": "住宅落地窗",
+        "productNeed": "隔热膜",
+        "rawNeed": "落地窗大概 20 平，隔热膜多少钱一平？",
+        "stage": "new",
+        "lastFollowUpResult": null
+      }
+    },
+    {
+      "id": "ls-015",
+      "name": "虚拟微信-扫码添加",
+      "context": {
+        "refId": "ref_synth_015",
+        "sourcePlatform": "抖音",
+        "businessType": "auto_film",
+        "target": "奥迪 A6L",
+        "productNeed": "改色膜",
+        "rawNeed": "留的是虚拟微信号，需打开上游聊天内容扫码添加客户微信",
+        "stage": "new",
+        "lastFollowUpResult": null
+      }
+    },
+    {
+      "id": "ls-016",
+      "name": "虚拟微信-待扫码",
+      "context": {
+        "refId": "ref_synth_016",
+        "sourcePlatform": "抖音",
+        "businessType": "auto_film",
+        "target": "奔驰 E300",
+        "productNeed": "隐形车衣",
+        "rawNeed": "客户微信为二维码形态，尚未添加成功",
+        "stage": "new",
+        "lastFollowUpResult": null
+      }
+    },
+    {
+      "id": "ls-017",
+      "name": "4S线索-店长主跟",
+      "context": {
+        "refId": "ref_synth_017",
+        "sourcePlatform": "4S店",
+        "businessType": "auto_film",
+        "target": "保时捷 Macan",
+        "productNeed": "全车车衣",
+        "rawNeed": "4S 店售后推荐，新车想一步到位贴车衣",
+        "stage": "new",
+        "lastFollowUpResult": null
+      }
+    },
+    {
+      "id": "ls-018",
+      "name": "沉默客户-回访唤醒",
+      "context": {
+        "refId": "ref_synth_018",
+        "sourcePlatform": "抖音",
+        "businessType": "auto_film",
+        "target": "大众 途观",
+        "productNeed": "车窗膜",
+        "rawNeed": "之前咨询过车窗膜，后来没回复",
+        "stage": "contacted",
+        "lastFollowUpResult": "已两周未回复，进入沉默观察"
+      }
+    },
+    {
+      "id": "ls-019",
+      "name": "中意向-问工期",
+      "context": {
+        "refId": "ref_synth_019",
+        "sourcePlatform": "视频号",
+        "businessType": "auto_film",
+        "target": "丰田 凯美瑞",
+        "productNeed": "改色膜",
+        "rawNeed": "全车改色膜贴完要几天？周末能贴吗？",
+        "stage": "new",
+        "lastFollowUpResult": null
+      }
+    },
+    {
+      "id": "ls-020",
+      "name": "低意向-仅留资",
+      "context": {
+        "refId": "ref_synth_020",
+        "sourcePlatform": "抖音",
+        "businessType": "auto_film",
+        "target": null,
+        "productNeed": null,
+        "rawNeed": "就留个联系方式，以后再说",
+        "stage": "new",
+        "lastFollowUpResult": null
+      }
+    },
+    {
+      "id": "ls-021",
+      "name": "中意向-转介绍关系维护人",
+      "context": {
+        "refId": "ref_synth_021",
+        "sourcePlatform": "老客户转介绍",
+        "businessType": "auto_film",
+        "target": "沃尔沃 S90",
+        "productNeed": "车窗膜",
+        "rawNeed": "老客户介绍，想给新车贴车窗膜，先了解下",
+        "stage": "new",
+        "lastFollowUpResult": null
+      }
+    },
+    {
+      "id": "ls-022",
+      "name": "高意向-已联系定时间",
+      "context": {
+        "refId": "ref_synth_022",
+        "sourcePlatform": "抖音",
+        "businessType": "auto_film",
+        "target": "极氪 001",
+        "productNeed": "改色膜",
+        "rawNeed": "确定要贴改色膜，颜色也选好了，约时间",
+        "stage": "contacted",
+        "lastFollowUpResult": "客户已确认意向，待预约具体施工时间"
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+Command output; exit code: 0
+
+
+> frontend@0.0.0 test
+> vitest run src/views/__tests__/AftercareView.spec.ts src/views/__tests__/AssetsView.spec.ts
+
+
+ RUN  v4.1.10 <isolated-checkout>/frontend
+
+
+ Test Files  2 passed (2)
+      Tests  27 passed (27)
+   Start at  15:51:07
+   Duration  4.08s (transform 4.38s, setup 100ms, import 5.78s, tests 1.54s, environment 490ms)

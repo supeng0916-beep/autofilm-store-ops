@@ -1,0 +1,782 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// 系统键值元数据：迁移机制基线，后续承载开关/配置类数据
+model SystemMeta {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+/// 用户账号：按人分配、不共用（SEC02）
+model User {
+  id             String     @id @default(cuid())
+  username       String     @unique
+  passwordHash   String     @map("password_hash")
+  displayName    String     @map("display_name")
+  disabled       Boolean    @default(false)
+  failedAttempts Int        @default(0) @map("failed_attempts")
+  lockedUntil    DateTime?  @map("locked_until")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+  userRoles      UserRole[]
+
+  @@map("users")
+}
+
+/// 角色：5 角色（老板/店长/销售运营/施工记录员/系统管理员），技师不设账号
+model Role {
+  id          String     @id @default(cuid())
+  code        String     @unique
+  name        String
+  description String?
+  createdAt   DateTime   @default(now()) @map("created_at")
+  userRoles   UserRole[]
+
+  @@map("roles")
+}
+
+/// 用户-角色关联：角色分配的唯一数据面（权限点映射在代码内）
+model UserRole {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  roleId     String   @map("role_id")
+  assignedAt DateTime @default(now()) @map("assigned_at")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role       Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+  @@index([roleId])
+  @@map("user_roles")
+}
+
+/// 审计日志：只增不改（P1-03），repository 层不提供 update/delete
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?  @map("actor_id")
+  actorName  String?  @map("actor_name")
+  action     String
+  objectType String   @map("object_type")
+  objectId   String?  @map("object_id")
+  before     Json?
+  after      Json?
+  ip         String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([objectType, objectId])
+  @@index([actorId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+/// 审批队列：对外动作的唯一出口（规格 §5.2 / A02）
+model ApprovalItem {
+  id          String    @id @default(cuid())
+  type        String
+  payload     Json
+  requesterId String    @map("requester_id")
+  approverId  String?   @map("approver_id")
+  status      String    @default("pending")
+  opinion     String?
+  basis       String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  decidedAt   DateTime? @map("decided_at")
+
+  @@index([status])
+  @@index([type])
+  @@map("approval_items")
+}
+
+/// 客户档案：唯一事实源；停止联系标记（SEC05）
+model Customer {
+  id                String          @id @default(cuid())
+  name              String
+  phone             String
+  wechat            String?
+  carModel          String?         @map("car_model")
+  plateNo           String?         @map("plate_no")
+  address           String?
+  contactPreference String?         @map("contact_preference")
+  stopContact       Boolean         @default(false) @map("stop_contact")
+  sourceReferralOwnerId String?     @map("source_referral_owner_id")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+  refId             CustomerRefId?
+  leads             Lead[]
+
+  @@map("customers")
+}
+
+/// AI 假名 ID 映射：脱敏用，严格本地，不进模型上下文（A04）
+model CustomerRefId {
+  id         String   @id @default(cuid())
+  customerId String   @unique @map("customer_id")
+  refId      String   @unique @map("ref_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@map("customer_ref_ids")
+}
+
+/// 客资：字段字典 38 列口径（docs/specs/2026-08-14-客资表字段字典.md）；一次派发/登记＝一条 Lead
+model Lead {
+  id                   String      @id @default(cuid())
+  leadNo               String      @unique @map("lead_no") // A 客资ID：L-YYYYMMDD-NNNN
+  customerId           String?     @map("customer_id")
+  batchId              String?     @map("batch_id")
+  // 来源归因（C–J）
+  sourceCategory       String      @map("source_category") // online/offline
+  sourcePlatform       String      @map("source_platform") // 抖音/4S店/老客户转介绍…
+  operatorEntity       String?     @map("operator_entity") // 运营主体
+  acquisitionMethod    String?     @map("acquisition_method") // 获客方式
+  upstreamDispatchNo   String?     @map("upstream_dispatch_no") // 派发NO/介绍人
+  adPlanText           String?     @map("ad_plan_text") // 广告计划原文，保留不改写
+  contentId            String?     @map("content_id")
+  chatLink             String?     @map("chat_link") // 上游聊天链接，仅 boss/store_manager 可见
+  // 客户画像（批次2，选填、最小必要：年龄段用分段不用生日）
+  gender        String? // male/female
+  ageBand       String? @map("age_band") // 18-25/26-35/36-45/46-55/55+
+  industry      String?
+  district      String? // 住所方位（大致区域）
+  purchaseDealer String? @map("purchase_dealer") // 购车门店
+  // 客户信息（K–R）
+  customerName         String?     @map("customer_name") // 客户称呼，未确认不补全
+  phone                String?
+  wechat               String?
+  wechatType           String      @default("unknown") @map("wechat_type") // real/virtual_ewm/unknown
+  businessType         String      @default("auto_film") @map("business_type") // auto_film/home_film
+  target               String? // 车型/住宅对象
+  productNeed          String?     @map("product_need") // 客户明确询问的产品
+  rawNeed              String?     @map("raw_need") // 客户原始需求原话
+  // 重复（S–T）
+  dupOfLeadId          String?     @map("dup_of_lead_id")
+  // 分配与作业（U–AC）
+  ownerUserId          String?     @map("owner_user_id")
+  stage                String      @default("new")
+  finalStatus          String      @default("active") @map("final_status")
+  silenceStage         String      @default("none") @map("silence_stage")
+  intentLevel          String      @default("pending") @map("intent_level")
+  intentEvidence       Json?       @map("intent_evidence")
+  intentConfirmedBy    String?     @map("intent_confirmed_by")
+  nextStep             String?     @map("next_step")
+  nextFollowUpAt       DateTime?   @map("next_follow_up_at")
+  lastFollowUpResult   String?     @map("last_follow_up_result")
+  lostReason           String?     @map("lost_reason")
+  // 五类时间戳（D-P3-4）
+  upstreamDispatchAt   DateTime?   @map("upstream_dispatch_at")
+  receivedAt           DateTime    @default(now()) @map("received_at") // SLA 起点
+  assignedAt           DateTime?   @map("assigned_at")
+  firstContactAttemptAt DateTime?  @map("first_contact_attempt_at")
+  firstCustomerReplyAt DateTime?    @map("first_customer_reply_at")
+  lastFollowUpAt       DateTime?   @map("last_follow_up_at")
+  // 报价/预约/结果（AD–AL）
+  quoteVersionRef      String?     @map("quote_version_ref")
+  quoteApprovalStatus  String      @default("not_triggered") @map("quote_approval_status")
+  dueAt                DateTime?   @map("due_at") // 当前阶段时限（各阶段分别配置，SystemMeta sla.stage.*）
+  pausedAt             DateTime?   @map("paused_at") // 暂停标记（暂停/恢复独立事件，不混入状态枚举）
+  visitApptAt          DateTime?   @map("visit_appt_at")
+  closedAt             DateTime?   @map("closed_at")
+  closedAmountFen      Int?        @map("closed_amount_fen")
+  closeReason          String?     @map("close_reason")
+  hqFeedbackStatus     String?     @map("hq_feedback_status") // AK 总部反馈状态（金山表）
+  remark               String?
+  // 派发解析留痕（D-P3-9）
+  dispatchRawText      String?     @map("dispatch_raw_text")
+  dispatchParserVersion Int?       @map("dispatch_parser_version")
+  enteredAt            DateTime    @default(now()) @map("entered_at")
+  createdAt            DateTime    @default(now()) @map("created_at")
+  updatedAt            DateTime    @updatedAt @map("updated_at")
+  customer             Customer?   @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  events               LeadEvent[]
+
+  @@index([stage])
+  @@index([finalStatus])
+  @@index([ownerUserId])
+  @@index([customerId])
+  @@index([receivedAt])
+  @@map("leads")
+}
+
+/// 客资互动流水：时间线事实源
+model LeadEvent {
+  id         String   @id @default(cuid())
+  leadId     String   @map("lead_id")
+  kind       String
+  content    Json?
+  operatorId String?  @map("operator_id")
+  occurredAt DateTime @default(now()) @map("occurred_at")
+  lead       Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+  @@map("lead_events")
+}
+
+/// 导入批次：文件指纹/行数/去重结果/操作人（审计）
+model ImportBatch {
+  id         String   @id @default(cuid())
+  kind       String   @default("csv")
+  fileName   String   @map("file_name")
+  fileHash   String   @map("file_hash")
+  rowCount   Int      @map("row_count")
+  dupCount   Int      @default(0) @map("dup_count")
+  operatorId String   @map("operator_id")
+  summary    Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("import_batches")
+}
+
+/// 销售机会：阶段状态机（规格 §7）；含车型/竞争比较/到店成交记录（原方案/最终方案/升单原因/毛利影响）
+model Opportunity {
+  id                  String   @id @default(cuid())
+  leadId              String?  @unique @map("lead_id")
+  customerId          String?  @map("customer_id")
+  ownerUserId         String?  @map("owner_user_id")
+  stage               String   @default("new")
+  takeover            Boolean  @default(false)
+  takeoverReason      String?  @map("takeover_reason")
+  carModel            String?  @map("car_model")
+  competitionCompare  String?  @map("competition_compare")
+  visitOriginalPlan   String?  @map("visit_original_plan")
+  visitFinalPlan      String?  @map("visit_final_plan")
+  upsellReason        String?  @map("upsell_reason")
+  grossMarginImpact   String?  @map("gross_margin_impact")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  @@index([stage])
+  @@index([ownerUserId])
+  @@map("opportunities")
+}
+
+/// 报价版本：产品/价格版本/优惠需审批标记/毛利影响
+model Quote {
+  id                    String   @id @default(cuid())
+  opportunityId         String   @map("opportunity_id")
+  version               Int
+  items                 Json
+  totalPrice            Decimal? @map("total_price") @db.Decimal(12, 2)
+  discountNeedsApproval Boolean  @default(false) @map("discount_needs_approval")
+  grossMarginImpact     String?  @map("gross_margin_impact")
+  createdBy             String   @map("created_by")
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  @@unique([opportunityId, version])
+  @@map("quotes")
+}
+
+/// 知识条目：产品/价格/质保/品牌/案例/技师专长/销售方法；版本/来源/授权/失效时间
+/// key 为业务唯一键，同键跨版本归组（如 "product-dm04"）；同 (kind,key) 下至多一条 status='active'
+model KnowledgeItem {
+  id         String    @id @default(cuid())
+  kind       String
+  key        String    @default("")
+  title      String
+  content    String
+  version    Int       @default(1)
+  source     String?
+  licensed   Boolean   @default(false)
+  expiresAt  DateTime? @map("expires_at")
+  status     String    @default("draft")
+  tags       Json?
+  createdBy  String    @map("created_by")
+  approvedBy String?   @map("approved_by")
+  approvedAt DateTime? @map("approved_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  @@index([kind])
+  @@index([status])
+  @@index([key])
+  @@index([kind, key])
+  @@map("knowledge_items")
+}
+
+/// 知识向量：pgvector；关联条目版本（向量索引 P4 建）
+model KnowledgeEmbedding {
+  id          String                       @id @default(cuid())
+  itemId      String                       @map("item_id")
+  itemVersion Int                          @map("item_version")
+  chunkText   String                       @map("chunk_text")
+  embedding   Unsupported("vector(1536)")
+  createdAt   DateTime                     @default(now()) @map("created_at")
+
+  @@index([itemId])
+  @@map("knowledge_embeddings")
+}
+
+/// AI 任务：规格 §5.1 状态机 + 成本与审计字段
+model AiTask {
+  id           String   @id @default(cuid())
+  taskType     String   @map("task_type")
+  refType      String?  @map("ref_type")
+  refId        String?  @map("ref_id")
+  status       String   @default("pending")
+  inputSummary String   @map("input_summary")
+  model        String?
+  tokensIn     Int?     @map("tokens_in")
+  tokensOut    Int?     @map("tokens_out")
+  output       Json?
+  retryCount   Int      @default(0) @map("retry_count")
+  deadlineAt      DateTime? @map("deadline_at")
+  dispatchedAt    DateTime? @map("dispatched_at")
+  callbackAt      DateTime? @map("callback_at")
+  finishedAt      DateTime? @map("finished_at")
+  errorMessage    String?   @map("error_message")
+  costEstimateFen Int?      @map("cost_estimate_fen")
+  /// 回答本任务的技能提示词版本（V1.5 批次5：SKILL.md frontmatter version，注册表登记同步）
+  skillVersion   Int?       @map("skill_version")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([taskType])
+  @@index([status, deadlineAt])
+  @@map("ai_tasks")
+}
+
+/// AI 输出人工反馈：采用/修改/拒绝（M11 学习链数据源）
+model AiTaskFeedback {
+  id        String   @id @default(cuid())
+  taskId    String   @map("task_id")
+  decision  String
+  note      String?
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([taskId])
+  @@map("ai_task_feedback")
+}
+
+/// 预约：工位/技师/档期/交付承诺（店长确认标记）；P5 扩展：客资关联/服务项目/指定技师/确认留痕
+model Appointment {
+  id                   String    @id @default(cuid())
+  leadId               String?   @map("lead_id")
+  customerId           String    @map("customer_id")
+  opportunityId        String?   @map("opportunity_id")
+  serviceItem          String?   @map("service_item")
+  businessType         String?   @map("business_type") // window_film/car_cover/color_change/home_film（v1.5；存量空=未分类）
+  workbench            String?
+  technicianName       String?   @map("technician_name")
+  technicianDesignated Boolean   @default(false) @map("technician_designated")
+  estHours             Float?    @map("est_hours")
+  startAt              DateTime  @map("start_at")
+  endAt                DateTime? @map("end_at")
+  promise              String?
+  managerConfirmed     Boolean   @default(false) @map("manager_confirmed")
+  managerConfirmedBy   String?   @map("manager_confirmed_by")
+  managerConfirmedAt   DateTime? @map("manager_confirmed_at")
+  status               String    @default("pending") // pending/confirmed/cancelled
+  createdBy            String?   @map("created_by")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+  technicianChanges    AppointmentTechnicianChange[]
+
+  @@index([customerId])
+  @@index([startAt])
+  @@index([workbench, startAt])
+  @@index([technicianName, startAt])
+  @@map("appointments")
+}
+
+/// 指定技师替换记录（P5-02）：客户确认后生效；未确认不得变更预约技师
+model AppointmentTechnicianChange {
+  id            String      @id @default(cuid())
+  appointmentId String      @map("appointment_id")
+  fromName      String      @map("from_name")
+  toName        String      @map("to_name")
+  reason        String?
+  status        String      @default("pending") // pending/confirmed/rejected
+  requestedBy   String      @map("requested_by")
+  requestedAt   DateTime    @default(now()) @map("requested_at")
+  confirmMethod String?     @map("confirm_method") // wechat/phone/onsite：客户确认方式
+  confirmedAt   DateTime?   @map("confirmed_at")
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  @@index([appointmentId])
+  @@map("appointment_technician_changes")
+}
+
+/// 施工单：阶段/照片/异常/返工/自检/复检/交付；P5 扩展：单号/客户机会关联/质保/补录/案例授权
+model WorkOrder {
+  id             String    @id @default(cuid())
+  orderNo        String    @unique @map("order_no") // W-YYYYMMDD-NNNN
+  appointmentId  String?   @map("appointment_id")
+  customerId     String?   @map("customer_id")
+  opportunityId  String?   @map("opportunity_id")
+  leadId         String?   @map("lead_id")
+  serviceItem    String?   @map("service_item")
+  businessType   String?   @map("business_type") // window_film/car_cover/color_change/home_film（v1.5；存量空=未分类）
+  workbench      String?
+  technicianName String?   @map("technician_name")
+  /// 技师 ID 关联（批次3 T3）：新单写入；存量按姓名回填。产值统计 ID 优先、姓名回退
+  technicianId String?
+
+  @@index([technicianId])
+  /// 住宅膜勘测（批次3）：{glassArea,orientation,glassMaterial,propertyCondition}——仅 home_film 用
+  homeSurvey   Json?
+  stage          String    @default("pending")
+  photos         Json?
+  abnormal       Json?
+  rework         Boolean   @default(false)
+  reworkRecords  Json?     @map("rework_records")
+  selfCheck      Json?     @map("self_check")
+  recheck        Json?
+  deliveredAt    DateTime? @map("delivered_at")
+  deliveredBy    String?   @map("delivered_by")
+  warrantyRef    String?   @map("warranty_ref")
+  careNotes      Json?     @map("care_notes")
+  caseRequest    Json?     @map("case_request")
+  recorderId     String?   @map("recorder_id")
+  backfilled     Boolean   @default(false) @map("backfilled")
+  backfillForAt  DateTime? @map("backfill_for_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  @@index([stage])
+  @@index([appointmentId])
+  @@index([customerId])
+  @@map("work_orders")
+}
+
+/// AI 任务状态历史：只增不改（规格 §5.1，与 audit_logs 同构；D-P2-2）
+model AiTaskEvent {
+  id         String   @id @default(cuid())
+  taskId     String   @map("task_id")
+  fromStatus String?  @map("from_status")
+  toStatus   String   @map("to_status")
+  reason     String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([taskId])
+  @@map("ai_task_events")
+}
+
+/// 站内通知（V2.2a）：按收件人存储；尽力而为——发送失败不影响业务主流程
+model Notification {
+  id         String    @id @default(cuid())
+  userId     String    @map("user_id")
+  kind       String // approval_pending/approval_decided/appointment_confirmed/…
+  title      String
+  body       String?
+  link       String?
+  sourceType String?   @map("source_type")
+  sourceId   String?   @map("source_id")
+  readAt     DateTime? @map("read_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@index([userId, readAt])
+  @@map("notifications")
+}
+
+/// 技师档案（V2.4，决策 C）：资源实体而非登录账号（技师不设账号，矩阵 §1）；
+/// active=false 表示离职/停用（不物理删除，留痕）。
+/// v1.5 §5.4：skills 改工种枚举数组（window_film/car_cover/color_change，应用层 Zod 校验），空数组=占位未填。
+/// 施工指标与忙闲状态不落本表：按 work_orders.technicianName 姓名匹配聚合（V1 口径，analytics.byTechnician 同源）。
+model Technician {
+  id        String   @id @default(cuid())
+  name      String
+  skills    String[] @default([]) // 工种枚举数组（v1.5 §5.4）：window_film/car_cover/color_change，应用层 Zod 校验
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("technicians")
+}
+
+/// 人员记录（V2.4）：考勤/奖惩/备注通用记录，subjectType 当前限 technician（V1 对象限技师，
+/// 预留 staff/agent 扩展）；只增不改不删（留痕，无修改删除端点）；occurredAt 必填支持补录；
+/// recordedBy=登录人 user id；subjectId 为松关联字符串（沿 WorkOrder.leadId 先例不设 FK）。
+model StaffRecord {
+  id          String   @id @default(cuid())
+  subjectType String   @map("subject_type")
+  subjectId   String   @map("subject_id")
+  kind        String // attendance/reward/punish/note（team.constants 唯一来源）
+  content     String
+  occurredAt  DateTime @map("occurred_at")
+  recordedBy  String   @map("recorded_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([subjectType, subjectId])
+  @@map("staff_records")
+}
+
+/// 素材库（V2.3b）：报价图/产品资料/施工过程/完工案例统一管理。
+/// 文件本体落 WG_UPLOAD_DIR/assets/（不入 git/库），此处只存元数据+路径；
+/// licensed 与知识库语义一致（对外引用须人工标记授权）；P5 存量施工照片 JSON 不迁移。
+/// v1.5 素材管线：fileHash SHA-256 去重、thumbPath 缩略图、mediaType/duration/tags 媒资口径。
+model Asset {
+  id             String   @id @default(cuid())
+  kind           String // quote_image/product_doc/process/finished
+  title          String
+  filePath       String   @map("file_path")
+  fileHash       String?  @unique @map("file_hash") // SHA-256 去重（v1.5 素材管线）；存量 NULL 不回填
+  thumbPath      String?  @map("thumb_path")
+  mediaType      String   @default("image") @map("media_type") // image/video/document
+  duration       Int? // 视频秒数
+  tags           String[] // 已确认标签（车型/产品/施工阶段…）
+  carModel       String?  @map("car_model")
+  productModel   String?  @map("product_model")
+  stage          String?
+  technicianName String?  @map("technician_name")
+  source         String?
+  licensed       Boolean  @default(false)
+  workOrderId    String?  @map("work_order_id")
+  createdBy      String   @map("created_by")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@index([kind])
+  @@index([workOrderId])
+  @@map("assets")
+}
+
+/// M09 回访计划（批次1）：施工单交付后自动生成 d7/d30 两条，也可手工加 custom
+model AftercareVisit {
+  id          String    @id @default(cuid())
+  workOrderId String    @map("work_order_id")
+  customerId  String?   @map("customer_id")
+  plan        String // d7/d30/custom
+  dueAt       DateTime  @map("due_at")
+  status      String    @default("pending") // pending/done/skipped
+  executedBy  String?   @map("executed_by")
+  executedAt  DateTime? @map("executed_at")
+  note        String?
+  createdBy   String?   @map("created_by")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@index([workOrderId])
+  @@index([status, dueAt])
+  @@map("aftercare_visits")
+}
+
+/// M09 售后受理（批次1）：咨询/复检/投诉/其他；投诉创建即通知老板
+model ServiceRequest {
+  id            String    @id @default(cuid())
+  customerId    String?   @map("customer_id")
+  leadId        String?   @map("lead_id")
+  workOrderId   String?   @map("work_order_id")
+  kind          String // consult/recheck/complaint/other
+  content       String
+  status        String    @default("open") // open/in_progress/resolved
+  handlerUserId String?   @map("handler_user_id")
+  resolvedAt    DateTime? @map("resolved_at")
+  result        String?
+  createdBy     String?   @map("created_by")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([customerId])
+  @@map("service_requests")
+}
+
+/// M09 电子质保登记（批次1）：登记与理赔分开（任务书红线），仅记录登记事实
+model WarrantyRegistration {
+  id             String    @id @default(cuid())
+  workOrderId    String?   @map("work_order_id")
+  customerId     String?   @map("customer_id")
+  productModel   String?   @map("product_model")
+  registrationNo String?   @map("registration_no")
+  registeredAt   DateTime? @map("registered_at")
+  status         String    @default("pending") // pending/registered
+  note           String?
+  createdBy      String?   @map("created_by")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  @@index([workOrderId])
+  @@map("warranty_registrations")
+}
+
+/// M09 转介绍登记（批次1）：介绍人客户 → 新客资；新客资成交时人工标 won
+model ReferralRecord {
+  id                  String   @id @default(cuid())
+  referrerCustomerId  String   @map("referrer_customer_id")
+  referredLeadId      String?  @unique @map("referred_lead_id")
+  referredCustomerId  String?  @map("referred_customer_id")
+  status              String   @default("pending") // pending/won
+  note                String?
+  createdBy           String?  @map("created_by")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  @@index([referrerCustomerId])
+  @@map("referral_records")
+}
+
+/// 订单确认单（批次1，可选步骤不作闸门）：成交后的报价快照与定金/尾款记录，leadId 唯一
+model OrderConfirmation {
+  id                  String    @id @default(cuid())
+  leadId              String    @unique @map("lead_id")
+  appointmentId       String?   @map("appointment_id")
+  products            String
+  quoteSnapshot       String    @map("quote_snapshot")
+  discountNote        String?   @map("discount_note")
+  depositFen          Int       @default(0) @map("deposit_fen")
+  balanceFen          Int       @default(0) @map("balance_fen")
+  /// 材料成本（分，批次4 毛利估算）：选填，复盘毛利口径仅统计已录成本的已确认订单
+  materialCostFen     Int?      @map("material_cost_fen")
+  payMethod           String?   @map("pay_method") // wechat/alipay/cash/card/other
+  status              String    @default("draft") // draft/confirmed
+  customerConfirmedBy String?   @map("customer_confirmed_by")
+  customerConfirmedAt DateTime? @map("customer_confirmed_at")
+  createdBy           String?   @map("created_by")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  @@map("order_confirmations")
+}
+
+/// 财务收支流水（批次2，append-only）：手工登记，复盘页收支口径来源
+model FinanceEntry {
+  id                   String   @id @default(cuid())
+  direction            String // income/expense
+  category             String
+  amountFen            Int      @map("amount_fen")
+  occurredOn           DateTime @map("occurred_on")
+  remark               String?
+  leadId               String?  @map("lead_id")
+  orderConfirmationId  String?  @map("order_confirmation_id")
+  createdBy            String?  @map("created_by")
+  createdAt            DateTime @default(now()) @map("created_at")
+
+  @@index([direction, occurredOn])
+  @@map("finance_entries")
+}
+
+/// 内容台账（批次2）：登记已发布内容，contentKey 与 Lead.contentId 关联做归因
+model ContentRecord {
+  id           String    @id @default(cuid())
+  contentKey   String    @unique @map("content_key")
+  title        String
+  platform     String?
+  publishedAt  DateTime? @map("published_at")
+  costFen      Int       @default(0) @map("cost_fen")
+  viewsCount   Int?      @map("views_count")
+  likesCount   Int?      @map("likes_count")
+  commentsCount Int?     @map("comments_count")
+  note         String?
+  createdBy    String?   @map("created_by")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@map("content_records")
+}
+
+/// 销售陪练会话（V1.5 批次6a）：全员共用的练功房——AI 演客户、员工练回答；
+/// 原文只作审计回溯不做检索（长期记忆走提炼后的经验卡，见批次6b）
+model RoleplaySession {
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
+  scenario  String // first_touch/price_objection/compare/bargain/silent_revive
+  persona   Json? // 客户画像 {carModel,budget,temperament,difficulty}
+  status    String    @default("active") // active/finished
+  score     Int? // 员工自评 1~5（可空）
+  review    Json? // AI 点评 {summary,strengths,improvements,demo}
+  startedAt DateTime  @default(now()) @map("started_at")
+  finishedAt DateTime? @map("finished_at")
+  turns     RoleplayTurn[]
+
+  @@index([userId])
+  @@map("roleplay_sessions")
+}
+
+/// 陪练对话回合：role=staff（员工）/ customer（AI 演的客户）
+model RoleplayTurn {
+  id        String   @id @default(cuid())
+  sessionId String   @map("session_id")
+  role      String // staff/customer
+  content   String
+  createdAt DateTime @default(now())
+
+  session   RoleplaySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@map("roleplay_turns")
+}
+
+/// 奖惩规则（批次3，仅 boss 可编）：系统按月算事实指标，命中生成草案——确认永远人定
+model RewardRule {
+  id          String   @id @default(cuid())
+  name        String
+  metric      String // delivered_count/rework_count/revenue_fen
+  comparator  String // gte/lte
+  threshold   Int
+  direction   String // reward/punish
+  amountFen   Int     @map("amount_fen")
+  enabled     Boolean  @default(true)
+  createdBy   String?  @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("reward_rules")
+}
+
+/// 同行内容数据（批次4，看板数据源）：账号维度登记同行动态——人工录入或爬虫自动填充
+model CompetitorPost {
+  id           String    @id @default(cuid())
+  account      String // 同行账号名/昵称
+  title        String
+  publishedAt  DateTime? @map("published_at")
+  likesCount   Int?      @map("likes_count")
+  commentsCount Int?     @map("comments_count")
+  sharesCount  Int?      @map("shares_count")
+  activityType String?   @map("activity_type") // 优惠/新品/案例/日常（人工归类）
+  source       String    @default("manual") // manual/crawler
+  note         String?
+  crawledAt    DateTime? @map("crawled_at") // 爬虫拉取时间（数据新鲜度）
+  createdBy    String?   @map("created_by")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@index([account])
+  @@map("competitor_posts")
+}
+
+/// M02 灵感库（短视频批次B）：爆款参考沉淀——人工录入的钩子/结构/节奏拆解，
+/// 供文案生成注入参考（searchForContext）与运营人工浏览（GET 列表）
+model VideoInspiration {
+  id        String   @id @default(cuid())
+  platform  String // 抖音/视频号/快手/其他
+  title     String
+  hookText  String   @map("hook_text") // 钩子拆解
+  structure String // 结构拆解
+  rhythm    String? // 节奏拆解（可空）
+  metrics   String? // 数据描述（如「50w 赞/1.2w 评」，文本非数值）
+  tags      String[] // 内容支柱/主题标签
+  isPeer    Boolean  @default(false) @map("is_peer") // 同行作品
+  sourceUrl String?  @map("source_url")
+  note      String?
+  status    String   @default("active") // active/archived/candidate（candidate=自动扫描候选，人工采纳才 active）
+  createdBy String   @map("created_by")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("video_inspirations")
+}
+
+/// M09 客户评价（缺口补齐批次，append-only）：交付后客户评分与评语
+model CustomerReview {
+  id          String    @id @default(cuid())
+  customerId  String?   @map("customer_id")
+  leadId      String?   @map("lead_id")
+  workOrderId String?   @map("work_order_id")
+  score       Int // 1-5
+  content     String?
+  reviewedAt  DateTime  @default(now()) @map("reviewed_at")
+  createdBy   String?   @map("created_by")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@index([workOrderId])
+  @@map("customer_reviews")
+}
+

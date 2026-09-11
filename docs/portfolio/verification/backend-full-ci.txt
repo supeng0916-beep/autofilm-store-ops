@@ -1,0 +1,25 @@
+CI output excerpt; command exit code: 1
+
+== 开发治理：规则回归 + 源码检查 ==
+ℹ pass 8
+ℹ fail 0
+开发治理通过：HNSW 迁移保护 / Vue 增长基线
+== 后端：ESLint + Prettier ==
+> backend@0.2.0 lint
+> eslint . && prettier --check .
+All matched files use Prettier code style!
+== 后端：类型检查 ==
+> backend@0.2.0 typecheck
+> tsc --noEmit
+== 后端：Vitest ==
+> backend@0.2.0 test
+> vitest run
+ FAIL  test/knowledge-search.e2e.spec.ts > 知识检索（P4-03） > 检索 > 存在相关条目时返回检索结果
+AssertionError: expected undefined to be truthy
+ ❯ test/knowledge-search.e2e.spec.ts:100:34
+ FAIL  test/knowledge.e2e.spec.ts > 知识库模块（P4-01） > CRUD > 不存在条目返回 404
+SyntaxError: Unexpected token 'N', "No mapping"... is not valid JSON
+ Test Files  2 failed | 95 passed (97)
+      Tests  2 failed | 1051 passed (1053)
+   Start at  16:02:27
+   Duration  98.34s (transform 2.23s, setup 226ms, import 30.60s, tests 60.36s, environment 4ms)

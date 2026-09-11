@@ -1,0 +1,11 @@
+node_modules
+# Keep environment variables out of version control
+.env
+
+/generated/prisma
+
+# P5-04 施工照片本地存储目录（路径入库，实体不入库）
+uploads/
+
+# 真人账号口令（seed:accounts 生成本地保管，S04）
+scripts/.accounts.local.json

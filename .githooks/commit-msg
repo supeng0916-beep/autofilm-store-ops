@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# 提交格式钩子（规范 S01）：type(Mxx): 描述；基础设施用 (base)
+msg="$(head -1 "$1")"
+# 豁免 git 自动生成的提交信息（Merge/Revert/Auto-merge）：
+# 这类消息由 git 按固定模板产出，无法也不应改写为 S01 格式（规范 S02 分支模型会产生它们）
+if [[ "$msg" =~ ^(Merge|Revert|Auto-merge) ]]; then
+  exit 0
+fi
+pattern='^(feat|fix|docs|refactor|test|chore)\((M0[1-9]|M1[0-2]|base)\): .{5,}'
+if ! [[ "$msg" =~ $pattern ]]; then
+  echo "❌ 提交信息不符合规范 S01：type(Mxx): 描述（描述至少5字）" >&2
+  echo "   示例：feat(M03): 客资导入去重规则；chore(base): 升级依赖" >&2
+  exit 1
+fi

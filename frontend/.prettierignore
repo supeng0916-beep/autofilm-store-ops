@@ -1,0 +1,7 @@
+# 构建产物不参与格式检查（与 eslint ignores 对齐）
+dist/
+coverage/
+
+# unplugin 自动生成的类型声明（由插件重新生成，不做格式检查）
+src/auto-imports.d.ts
+src/components.d.ts
